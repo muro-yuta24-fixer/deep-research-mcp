@@ -1,3 +1,4 @@
+import { createAzure } from '@ai-sdk/azure';
 import { createOpenAI, type OpenAIProviderSettings } from '@ai-sdk/openai';
 import { type LanguageModelV1 } from '@ai-sdk/provider';
 import { getEncoding } from 'js-tiktoken';
@@ -15,10 +16,18 @@ const openai = createOpenAI({
   baseURL: process.env.OPENAI_ENDPOINT || 'https://api.openai.com/v1',
 } as CustomOpenAIProviderSettings);
 
+const azure = createAzure({
+  apiKey: process.env.AZURE_OPENAI_API_KEY!,
+  resourceName: process.env.AZURE_OPENAI_RESOURCE_NAME,
+  apiVersion: process.env.OPENAI_API_VERSION,
+});
+
+const llm = azure;
+
 const customModel = process.env.OPENAI_MODEL || 'o3-mini';
 
 // Create model with Langfuse instrumentation
-const baseModel = openai(customModel, {
+const baseModel = llm(customModel, {
   reasoningEffort: customModel.startsWith('o') ? 'medium' : undefined,
   structuredOutputs: true,
 });
