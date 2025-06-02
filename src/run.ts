@@ -108,54 +108,59 @@ ${followUpQuestions.map((q: string, i: number) => `Q: ${q}\nA: ${answers[i]}`).j
     sourceReliability: {
       high: 0,
       medium: 0,
-      low: 0
+      low: 0,
     },
-    totalLearnings: 0
+    totalLearnings: 0,
   };
 
-  const { learnings, visitedUrls, sourceMetadata, weightedLearnings } = await deepResearch({
-    query: combinedQuery,
-    breadth,
-    depth,
-    onProgress: progress => {
-      output.updateProgress(progress);
+  const { learnings, visitedUrls, sourceMetadata, weightedLearnings } =
+    await deepResearch({
+      query: combinedQuery,
+      breadth,
+      depth,
+      onProgress: progress => {
+        output.updateProgress(progress);
 
-      if (progress.currentQuery && progress.learningsCount) {
-        // Track query chain in research span
-        researchSpan.update({
-          output: {
-            queries: {
-              current: progress.currentQuery,
-              parent: progress.parentQuery,
-              depth: progress.currentDepth,
-              learnings: progress.learnings,
-              followUps: progress.followUpQuestions
-            }
-          }
-        });
+        if (progress.currentQuery && progress.learningsCount) {
+          // Track query chain in research span
+          researchSpan.update({
+            output: {
+              queries: {
+                current: progress.currentQuery,
+                parent: progress.parentQuery,
+                depth: progress.currentDepth,
+                learnings: progress.learnings,
+                followUps: progress.followUpQuestions,
+              },
+            },
+          });
 
-        // Track metrics
-        researchMetrics.queries.set(progress.currentQuery, {
-          query: progress.currentQuery,
-          parentQuery: progress.parentQuery,
-          depth: progress.currentDepth,
-          learnings: progress.learnings || [],
-          followUpQuestions: progress.followUpQuestions || []
-        });
-        researchMetrics.totalLearnings += progress.learningsCount;
-      }
-    },
-  });
+          // Track metrics
+          researchMetrics.queries.set(progress.currentQuery, {
+            query: progress.currentQuery,
+            parentQuery: progress.parentQuery,
+            depth: progress.currentDepth,
+            learnings: progress.learnings || [],
+            followUpQuestions: progress.followUpQuestions || [],
+          });
+          researchMetrics.totalLearnings += progress.learningsCount;
+        }
+      },
+    });
 
   // Analyze source reliability distribution
   sourceMetadata.forEach(source => {
-    if (source.reliabilityScore >= 0.8) researchMetrics.sourceReliability.high++;
-    else if (source.reliabilityScore >= 0.5) researchMetrics.sourceReliability.medium++;
+    if (source.reliabilityScore >= 0.8)
+      researchMetrics.sourceReliability.high++;
+    else if (source.reliabilityScore >= 0.5)
+      researchMetrics.sourceReliability.medium++;
     else researchMetrics.sourceReliability.low++;
   });
 
   // Calculate weighted reliability score
-  const avgReliability = weightedLearnings.reduce((acc, curr) => acc + curr.reliability, 0) / weightedLearnings.length;
+  const avgReliability =
+    weightedLearnings.reduce((acc, curr) => acc + curr.reliability, 0) /
+    weightedLearnings.length;
 
   researchSpan.end({
     output: {
@@ -164,10 +169,10 @@ ${followUpQuestions.map((q: string, i: number) => `Q: ${q}\nA: ${answers[i]}`).j
         totalLearnings: learnings.length,
         uniqueSources: visitedUrls.length,
         avgReliability,
-        sourceReliability: researchMetrics.sourceReliability
+        sourceReliability: researchMetrics.sourceReliability,
       },
-      queries: Array.from(researchMetrics.queries.values())
-    }
+      queries: Array.from(researchMetrics.queries.values()),
+    },
   });
 
   log(`\n\nLearnings:\n\n${learnings.join('\n')}`);
@@ -179,15 +184,15 @@ ${followUpQuestions.map((q: string, i: number) => `Q: ${q}\nA: ${answers[i]}`).j
     name: 'Generate Final Report',
     input: {
       learningCount: learnings.length,
-      sourceCount: visitedUrls.length
-    }
+      sourceCount: visitedUrls.length,
+    },
   });
 
   const report = await writeFinalReport({
     prompt: combinedQuery,
     learnings,
     visitedUrls,
-    sourceMetadata
+    sourceMetadata,
   });
 
   await fs.writeFile('output.md', report, 'utf-8');
@@ -195,8 +200,8 @@ ${followUpQuestions.map((q: string, i: number) => `Q: ${q}\nA: ${answers[i]}`).j
   reportSpan.end({
     output: {
       reportLength: report.length,
-      reportSaved: true
-    }
+      reportSaved: true,
+    },
   });
 
   // Update final session metrics
@@ -207,9 +212,9 @@ ${followUpQuestions.map((q: string, i: number) => `Q: ${q}\nA: ${answers[i]}`).j
         totalSources: visitedUrls.length,
         avgReliability,
         sourceReliability: researchMetrics.sourceReliability,
-        reportLength: report.length
-      }
-    }
+        reportLength: report.length,
+      },
+    },
   });
 
   await langfuse.shutdownAsync();
