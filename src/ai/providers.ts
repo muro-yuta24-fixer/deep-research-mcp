@@ -1,21 +1,11 @@
 import { createAzure } from '@ai-sdk/azure';
-import { createOpenAI, type OpenAIProviderSettings } from '@ai-sdk/openai';
 import { type LanguageModelV1 } from '@ai-sdk/provider';
 import { getEncoding } from 'js-tiktoken';
 
 import langfuse from './observability.js';
 import { RecursiveCharacterTextSplitter } from './text-splitter.js';
 
-interface CustomOpenAIProviderSettings extends OpenAIProviderSettings {
-  baseURL?: string;
-}
-
-// Create OpenAI provider
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-  baseURL: process.env.OPENAI_ENDPOINT || 'https://api.openai.com/v1',
-} as CustomOpenAIProviderSettings);
-
+// Create AzureOpenAI provider
 const azure = createAzure({
   apiKey: process.env.AZURE_OPENAI_API_KEY!,
   resourceName: process.env.AZURE_OPENAI_RESOURCE_NAME,
