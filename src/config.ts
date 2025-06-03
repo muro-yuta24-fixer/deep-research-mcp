@@ -11,7 +11,9 @@ config({ path: resolve(__dirname, '../.env.local') });
 
 // Define and validate the environment schema
 const envSchema = z.object({
-  OPENAI_API_KEY: z.string().min(1),
+  AZURE_API_KEY: z.string().min(1),
+  AZURE_RESOURCE_NAME: z.string(),
+  OPENAI_API_VERSION: z.string(),
   FIRECRAWL_BASE_URL: z.string().url().optional(),
   FIRECRAWL_KEY: z.string().optional(),
   FIRECRAWL_CONCURRENCY: z.string().transform(Number).default('2'),
@@ -24,8 +26,10 @@ const env = envSchema.parse(process.env);
 
 // Export the validated config
 export const Config = {
-  openai: {
-    apiKey: env.OPENAI_API_KEY,
+  azure: {
+    apiKey: env.AZURE_API_KEY,
+    resourceName: env.AZURE_RESOURCE_NAME,
+    apiVersion: env.OPENAI_API_VERSION,
   },
   firecrawl: {
     baseUrl: env.FIRECRAWL_BASE_URL,
@@ -40,4 +44,4 @@ export const Config = {
 } as const;
 
 // Export individual configs for convenience
-export const { openai, firecrawl, langfuse } = Config;
+export const { azure, firecrawl, langfuse } = Config;

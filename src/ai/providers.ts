@@ -6,18 +6,12 @@ import langfuse from './observability.js';
 import { RecursiveCharacterTextSplitter } from './text-splitter.js';
 
 // Create AzureOpenAI provider
-const azure = createAzure({
-  apiKey: process.env.AZURE_OPENAI_API_KEY!,
-  resourceName: process.env.AZURE_OPENAI_RESOURCE_NAME,
-  apiVersion: process.env.OPENAI_API_VERSION,
-});
-
-const llm = azure;
+const azure = createAzure();
 
 const customModel = process.env.OPENAI_MODEL || 'o3-mini';
 
 // Create model with Langfuse instrumentation
-const baseModel = llm(customModel, {
+const baseModel = azure(customModel, {
   reasoningEffort: customModel.startsWith('o') ? 'medium' : undefined,
   structuredOutputs: true,
 });

@@ -16,7 +16,7 @@ const log = (...args: any[]) => {
 
 // Log environment check
 log('Environment check:', {
-  hasOpenAiKey: !!Config.openai.apiKey,
+  hasOpenAiKey: !!Config.azure.apiKey,
   hasFirecrawlKey: !!Config.firecrawl.apiKey,
   firecrawlBaseUrl: Config.firecrawl.baseUrl || '(using API)',
   firecrawlConcurrency: Config.firecrawl.concurrency,
